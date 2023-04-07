@@ -5,8 +5,14 @@ from flask_restful import Resource
 class Person(Resource):
 
     def validate(self):
+
         self.name = request.form.get('name', None)
-        print('AQUI -> ', self.name)
+        self.born_date = request.form.get('born_date', None)
+        self.address = request.form.get('address', None)
+        self.phone = request.form.get('phone', None)
+        self.email = request.form.get('email', None)
+        self.have_car = request.form.get('have_car', None)
+
         if not self.name:
             return {'status': 400, 'message': '400 field empty or wrong name of field'} , 400
 

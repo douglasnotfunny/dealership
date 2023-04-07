@@ -11,22 +11,21 @@ def delete_db(data):
     db.session.commit()
 
 class PersonDb(db.Model):
+    __tablename__ = 'person_db'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    born_date = db.Column(db.String(10), nullable=True)
-    address = db.Column(db.String(100), nullable=True)
-    phone = db.Column(db.String(15), nullable=True)
-    email = db.Column(db.String(30), nullable=True)
-    have_car = db.Column(db.Boolean, nullable=True)
+    born_date = db.Column(db.String(10), nullable=False)
+    address = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(15), nullable=False)
+    email = db.Column(db.String(30), nullable=False)
+    have_car = db.Column(db.Boolean, nullable=False)
 
 
 class Cars(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    model = db.Column(db.String(100), nullable=True)
-    color = db.Column(db.String(15), nullable=True)
-    ownier_id = db.Column(db.Integer, db.ForeignKey('pessoa.id'), nullable=False)  # Chave estrangeira para a tabela Pessoa
-    proprietario = db.relationship('Pessoa', backref='carros', lazy=True)  # Relacionamento com a tabela Pessoa
-
-
-
+    model = db.Column(db.String(100), nullable=False)
+    color = db.Column(db.String(15), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('person_db.id'))
+    owner = db.relationship('PersonDb')
