@@ -1,58 +1,67 @@
-from flask import request
-from model import Cars, add, delete_db
+from flask import request, abort
 from flask_restful import Resource
+
+import logging
+
+from model import Cars, add, delete_db
+from .utils import mount_dict_to_return
 
 class Car(Resource):
 
-    def validate(self):
+    def validate_year(self, year):
+        if year >= 1908:
+            return year
+        abort(400, 'Year is less than 1908')
 
-        self.name = request.form.get('name', None)
+    def validate_color(self, color):
+        if color in ['yellow', 'blue', 'gray']:
+            return color
+        abort(400, 'Color must be yellow or blue or gray')
+
+    def validate_model(self, model):
+        if model in ['hatch', 'sedan','convertible']:
+            return model
+        abort(400, 'Model must be hatch or sedan or convertible')
+
+    def get_data(self):
+        self.model = self.validate_model(request.form.get('model'))
+        self.color = self.validate_color(request.form.get('color'))
+        self.year = self.validate_year(int(request.form.get('year')))
         self.owner_id = request.form.get('owner_id', None)
-        self.model = request.form.get('model', None)
-        self.color = request.form.get('color', None)
 
-        print('Car -> ',Cars.__dict__.keys())
-        print('Request -> ',request.form.keys())
-
-        if not self.name:
-            return {'status': 400, 'message': '400 field empty or wrong name of field'} , 400
-
-    def insert_in_dict(self, car):
-        cars = {}
-        cars['id'] = car.id
-        cars['name'] = car.name
-        cars['owner_id'] = car.owner_id
-
-        return cars
-
+        logging.info(f"payload->{request.form.to_dict()}")
 
     def post(self):
-        data = self.validate()
-        if data:
-            return data
+        self.get_data()
+        car = Cars(model=self.model, color=self.color,
+                   year=int(self.year), owner_id=int(self.owner_id))
+        car_dict = mount_dict_to_return(car)
 
-        print(self.name, self.owner_id)
-        car = Cars(name=self.name, owner_id=int(self.owner_id), model=self.model, color=self.color)
-        print(car)
-        add(car)
+        try:
+            add(car)
+        except Exception as exc:
+            abort(400, f'Error to insert {exc.with_traceback}')
 
         data = []
-        data.append(self.insert_in_dict(car))
+        data.append(car_dict)
         return {'status': 201, 'data': data} , 201
 
     def get(self):
         cars_db = Cars.query.all()
+        logging.info(f'DICT -> {cars_db}')
         result = []
         for car in cars_db:
-            result.append(self.insert_in_dict(car))
+            logging.info(f'DICT -> {car.__dict__}')
+            result.append(car.__dict__)
         return {'status': 200, 'data': result} , 200
 
     def delete(self, car_id):
         car = Cars.query.get(car_id)  # Busca o registro pelo ID
         if car:
-            delete_db(car)
+            try:
+                delete_db(car)
+            except Exception as exc:
+                abort(400, f'Error to delete {exc.with_traceback}')
             return {'status': 202, 'data': self.insert_in_dict(car)} , 202
         else:
-            return {'status': 400, 'data': self.insert_in_dict(car)} , 400
-
-
+            abort(404, f'Car not founded')
