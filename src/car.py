@@ -6,6 +6,7 @@ import logging
 
 from model import Cars, PersonDb, add, delete_db
 from .utils import mount_dict_to_return, verify_object_exist
+from authorization import auth
 
 class Car(Resource):
 
@@ -33,6 +34,7 @@ class Car(Resource):
 
         logging.info(f"payload: {request.form.to_dict()}")
 
+    @auth.login_required
     def post(self) -> tuple:
         self.get_data()
         car = Cars(model=self.model, color=self.color,

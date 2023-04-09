@@ -2,14 +2,19 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_migrate import Migrate
+from flask_httpauth import HTTPBasicAuth
 
 from src.person import Person
 from src.car import Car
 from model import db
+
 import logging
 
 app = Flask(__name__)
-api = Api(app)
+
+
+def verify_password(username, password):
+    return username == 'user' and password == 'password'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db.init_app(app)
@@ -22,6 +27,7 @@ if app.debug:
 else:
     logging.basicConfig(level=logging.INFO)
 
+api = Api(app)
 api.add_resource(Person, '/people', '/people/<int:person_id>')
 api.add_resource(Car, '/car', '/car/<int:car_id>')
 
