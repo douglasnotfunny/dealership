@@ -1,4 +1,5 @@
 from flask import request, abort
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource
 
 import traceback
@@ -6,7 +7,7 @@ import logging
 
 from model import Cars, PersonDb, add, delete_db
 from .utils import mount_dict_to_return, verify_object_exist
-from authorization import auth
+
 
 class Car(Resource):
 
@@ -34,8 +35,9 @@ class Car(Resource):
 
         logging.info(f"payload: {request.form.to_dict()}")
 
-    @auth.login_required
+    @jwt_required(optional=True)
     def post(self) -> tuple:
+        logging.info("post()")
         self.get_data()
         car = Cars(model=self.model, color=self.color,
                       year=self.year, owner_id=self.owner_id)
@@ -45,11 +47,12 @@ class Car(Resource):
             id = add(car)
             data.append(mount_dict_to_return(Cars.query.get(id)))
         except Exception as exc:
-            logging.error(exc, traceback.format_exc())
+            logging.error(str(traceback.format_exc()))
             abort(400, 'Error to insert')
 
         return {'status': 201, 'data': data} , 201
 
+    @jwt_required(optional=True)
     def get(self) -> tuple:
         cars_db = Cars.query.all()
         result = []
@@ -57,6 +60,7 @@ class Car(Resource):
             result.append(mount_dict_to_return(car))
         return {'status': 200, 'data': result} , 200
 
+    @jwt_required(optional=True)
     def delete(self, car_id: int):
         car = verify_object_exist(Cars, car_id)
         try:

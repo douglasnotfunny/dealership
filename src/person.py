@@ -1,4 +1,5 @@
 from flask import request, abort
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource
 
 import logging
@@ -19,6 +20,7 @@ class Person(Resource):
 
         logging.info(f"payload->{request.form.to_dict()}")
 
+    @jwt_required(optional=True)
     def post(self) -> tuple:
         self.get_data()
         person = PersonDb(name=self.name, born_date=self.born_date, address=self.address,
@@ -29,11 +31,12 @@ class Person(Resource):
             id = add(person)
             data.append(mount_dict_to_return(PersonDb.query.get(id)))
         except Exception as exc:
-            logging.error(exc, traceback.format_exc())
+            logging.error(str(traceback.format_exc()))
             abort(400, 'Error to insert')
 
         return {'status': 201, 'data': data} , 201
 
+    @jwt_required(optional=True)
     def get(self) -> tuple:
         people_db = PersonDb.query.all()
         result = []
@@ -41,6 +44,7 @@ class Person(Resource):
             result.append(mount_dict_to_return(person))
         return {'status': 200, 'data': result} , 200
 
+    @jwt_required(optional=True)
     def delete(self, person_id: int) -> tuple:
         person = verify_object_exist(PersonDb, person_id)
         try:

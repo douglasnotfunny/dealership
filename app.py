@@ -3,6 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_migrate import Migrate
 from flask_httpauth import HTTPBasicAuth
+from flask_jwt_extended import JWTManager
+
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+jwt_secret_key = os.environ.get('SECRET_KEY')
 
 from src.person import Person
 from src.car import Car
@@ -12,9 +20,12 @@ import logging
 
 app = Flask(__name__)
 
+app.config['JWT_SECRET_KEY'] = jwt_secret_key
+app.config['JWT_TOKEN_LOCATION'] = ['headers']
+app.config['JWT_HEADER_NAME'] = 'Authorization'
+app.config['JWT_HEADER_TYPE'] = 'Bearer'
 
-def verify_password(username, password):
-    return username == 'user' and password == 'password'
+jwt = JWTManager(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db.init_app(app)
