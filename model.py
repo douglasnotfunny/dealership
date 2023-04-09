@@ -8,6 +8,7 @@ def add(data):
     logging.info(f'function.add({data.__dict__})')
     db.session.add(data)
     db.session.commit()
+    return data.id
 
 def delete_db(data):
     logging.info(f'function.delete({data})')

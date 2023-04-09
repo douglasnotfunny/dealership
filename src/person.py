@@ -5,7 +5,7 @@ import logging
 import traceback
 
 from model import PersonDb, add, delete_db
-from .utils import mount_dict_to_return
+from .utils import mount_dict_to_return, verify_object_exist
 
 class Person(Resource):
 
@@ -19,37 +19,33 @@ class Person(Resource):
 
         logging.info(f"payload->{request.form.to_dict()}")
 
-    def post(self):
+    def post(self) -> tuple:
         self.get_data()
         person = PersonDb(name=self.name, born_date=self.born_date, address=self.address,
                           phone=self.phone, email=self.email)
-        # person_dict = mount_dict_to_return(person.__dict__)
 
         data = []
         try:
-            add(person)
+            id = add(person)
+            data.append(mount_dict_to_return(PersonDb.query.get(id)))
         except Exception as exc:
             logging.error(exc, traceback.format_exc())
             abort(400, 'Error to insert')
 
-        data = []
         return {'status': 201, 'data': data} , 201
 
-    def get(self):
+    def get(self) -> tuple:
         people_db = PersonDb.query.all()
         result = []
         for person in people_db:
-            result.append(person)
+            result.append(mount_dict_to_return(person))
         return {'status': 200, 'data': result} , 200
 
-    def delete(self, person_id):
-        person = PersonDb.query.get(person_id)  # Busca o registro pelo ID
-        if person:
-            try:
-                delete_db(person)
-            except Exception as exc:
-                Exception('Error to delete', exc.with_traceback)
-            return {'status': 202, 'data': self.insert_in_dict(person)} , 202
-        else:
-            return {'status': 400, 'data': self.insert_in_dict(person)} , 400
+    def delete(self, person_id: int) -> tuple:
+        person = verify_object_exist(PersonDb, person_id)
+        try:
+            delete_db(person)
+        except Exception as exc:
+            abort(400, 'Error to delete exc.with_traceback')
+        return {'status': 202, 'data': mount_dict_to_return(person)} , 202
 
