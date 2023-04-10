@@ -47,9 +47,6 @@ class Person(Resource):
     @jwt_required(optional=True)
     def delete(self, person_id: int) -> tuple:
         person = verify_object_exist(PersonDb, person_id)
-        try:
-            delete_db(person)
-        except Exception as exc:
-            abort(400, 'Error to delete exc.with_traceback')
+        delete_db(person)
         return {'status': 202, 'data': mount_dict_to_return(person)} , 202
 

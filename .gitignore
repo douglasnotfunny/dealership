@@ -3,3 +3,4 @@ database.db
 instance
 migrations
 .env
+.coverage

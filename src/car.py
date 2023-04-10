@@ -6,7 +6,7 @@ import traceback
 import logging
 
 from model import Cars, PersonDb, add, delete_db
-from .utils import mount_dict_to_return, verify_object_exist
+from .utils import mount_dict_to_return, verify_object_exist, verify_if_exist_more_than_three
 
 
 class Car(Resource):
@@ -30,8 +30,8 @@ class Car(Resource):
         self.model = self.validate_model(request.form.get('model'))
         self.color = self.validate_color(request.form.get('color'))
         self.year = self.validate_year(int(request.form.get('year')))
-        person = verify_object_exist(PersonDb, int(request.form.get('owner_id')))
-        self.owner_id = person.id
+        person = verify_if_exist_more_than_three(int(request.form.get('owner_id')))
+        self.owner_id = int(request.form.get('owner_id'))
 
         logging.info(f"payload: {request.form.to_dict()}")
 
@@ -43,12 +43,8 @@ class Car(Resource):
                       year=self.year, owner_id=self.owner_id)
 
         data = []
-        try:
-            id = add(car)
-            data.append(mount_dict_to_return(Cars.query.get(id)))
-        except Exception as exc:
-            logging.error(str(traceback.format_exc()))
-            abort(400, 'Error to insert')
+        id = add(car)
+        data.append(mount_dict_to_return(Cars.query.get(id)))
 
         return {'status': 201, 'data': data} , 201
 
@@ -63,8 +59,5 @@ class Car(Resource):
     @jwt_required(optional=True)
     def delete(self, car_id: int):
         car = verify_object_exist(Cars, car_id)
-        try:
-            delete_db(car)
-        except Exception as exc:
-            abort(400, f'Error to delete {exc.with_traceback}')
+        delete_db(car)
         return {'status': 202, 'data': mount_dict_to_return(car)} , 202
