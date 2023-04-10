@@ -17,3 +17,5 @@ No arquivo Dearlership.postman_collection.json contém os endpoints criados para
 - Para visualizar a cobertura dos testes basta utilizar o comando:
   
     coverage report
+
+A rota usa validação de token, que está no CURL da colection basta importá-lo no POSTMAN para usar
