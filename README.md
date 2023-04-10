@@ -18,4 +18,4 @@ No arquivo Dearlership.postman_collection.json contém os endpoints criados para
   
     coverage report
 
-A rota usa validação de token, que está no CURL da colection
+A rota usa validação de token, que está no CURL da colection basta importá-lo no POSTMAN para usar
