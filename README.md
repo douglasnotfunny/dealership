@@ -14,6 +14,6 @@ No arquivo Dearlership.postman_collection.json contém os endpoints criados para
   
   coverage run -m pytest test/
   
-  - Para visualizar a cobertura dos testes basta utilizar o comando:
+- Para visualizar a cobertura dos testes basta utilizar o comando:
   
     coverage report
