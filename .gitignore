@@ -2,5 +2,4 @@ __pycache__
 database.db
 instance
 migrations
-.env
 .coverage
