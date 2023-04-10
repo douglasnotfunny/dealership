@@ -21,7 +21,7 @@ def verify_if_exist_more_than_three(id):
     logging.info(id)
     get_object = Cars.query.filter(Cars.owner_id == id).count()
     logging.info(get_object)
-    if get_object <= 3:
+    if get_object < 3:
         return id
     abort(400, f'Exist more than 3 cars for this person')
 
